@@ -1,7 +1,8 @@
 """A bot to count the emojis in the guild."""
 
-from collections import Counter
+from collections import Counter, OrderedDict
 from itertools import zip_longest
+from operator import itemgetter
 
 import discord
 
@@ -19,7 +20,6 @@ class DakaP(discord.Client):
     """A bot to count the emojis in the guild."""
 
     prefix = '$ '
-    history_limit = 10
 
     async def on_ready(self):
         """Triggered when ready."""
@@ -43,25 +43,28 @@ class DakaP(discord.Client):
             elif command == 'emoji':
 
                 emojis = [str(emoji) for emoji in message.guild.emojis]
+                emoji_counter = Counter(emojis)
 
                 for channel in message.guild.channels:
                     if isinstance(channel, discord.TextChannel) and \
                             message.guild.me.permissions_in(channel).read_message_history:
 
-                        emoji_counter = await self.count_emoji_in_channel(emojis, channel)
+                        emoji_counter += await self.count_emoji_in_channel(emojis, channel)
 
-                        result = []
-                        for emoji, count in emoji_counter.items():
-                            result.append(f'{emoji}: {count - 1 :3}')
+                sorted_counter = OrderedDict(
+                    sorted(emoji_counter.items(), key=itemgetter(1), reverse=True)
+                )
 
-                        await message.channel.send(
-                            '\n'.join(
-                                [f'Channel: {channel.mention}']
-                                + ['\t'.join(column) for column in grouper(
-                                    result, self.history_limit, fillvalue=''
-                                )]
-                            )
-                        )
+                result = []
+
+                for emoji, count in sorted_counter.items():
+                    result.append(f'{emoji}: {count - 1 :3}')
+
+                await message.channel.send(
+                    '\n'.join(
+                        ['\t'.join(column) for column in grouper(result, 10, fillvalue='')]
+                    )
+                )
 
             elif command == 'clean':
                 await message.channel.purge(check=self.is_msg_from_me)
@@ -71,10 +74,8 @@ class DakaP(discord.Client):
         return msg.author.id == self.user.id
 
     async def count_emoji_in_channel(self, emojis, channel):
-        """Count emojis in the messages in the channel.
-           The counters start at 1.
-        """
-        emoji_counter = Counter(emojis)
+        """Count emojis in the messages in the channel."""
+        emoji_counter = Counter()
 
         async for history_message in channel.history(limit=5000):
             if not self.is_msg_from_me(history_message):
