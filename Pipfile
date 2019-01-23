@@ -1,0 +1,16 @@
+[[source]]
+name = "pypi"
+url = "https://pypi.org/simple"
+verify_ssl = true
+
+[dev-packages]
+pylint = "*"
+ipython = "*"
+flake8 = "*"
+rope = "*"
+
+[packages]
+discord-py = {git = "https://github.com/Rapptz/discord.py",ref = "rewrite"}
+
+[requires]
+python_version = "3.7"
