@@ -3,6 +3,7 @@
 from collections import Counter, OrderedDict
 from itertools import zip_longest
 from operator import itemgetter
+from datetime import datetime, timedelta
 
 import discord
 
@@ -19,7 +20,7 @@ def grouper(iterable, number, fillvalue=None):
 class DakaP(discord.Client):
     """A bot to count the emojis in the guild."""
 
-    prefix = '$ '
+    prefix = '$'
 
     async def on_ready(self):
         """Triggered when ready."""
@@ -45,11 +46,15 @@ class DakaP(discord.Client):
                 emojis = [str(emoji) for emoji in message.guild.emojis]
                 emoji_counter = Counter(emojis)
 
+                start_time = datetime.utcnow() - timedelta(weeks=12)
+
                 for channel in message.guild.channels:
                     if isinstance(channel, discord.TextChannel) and \
                             message.guild.me.permissions_in(channel).read_message_history:
 
-                        emoji_counter += await self.count_emoji_in_channel(emojis, channel)
+                        emoji_counter += await self.count_emoji_in_channel(
+                            emojis, channel, after=start_time
+                        )
 
                 sorted_counter = OrderedDict(
                     sorted(emoji_counter.items(), key=itemgetter(1), reverse=True)
@@ -61,7 +66,9 @@ class DakaP(discord.Client):
                     result.append(f'{emoji}: {count - 1 :3}')
 
                 await message.channel.send(
-                    '\n'.join(
+                    (f'Count from '
+                     f'{(start_time + timedelta(hours=8)).isoformat(timespec="seconds")}\n')
+                    + '\n'.join(
                         ['\t'.join(column) for column in grouper(result, 10, fillvalue='')]
                     )
                 )
@@ -73,11 +80,11 @@ class DakaP(discord.Client):
         """Check if the message is sent by this bot."""
         return msg.author.id == self.user.id
 
-    async def count_emoji_in_channel(self, emojis, channel):
+    async def count_emoji_in_channel(self, emojis, channel, after):
         """Count emojis in the messages in the channel."""
         emoji_counter = Counter()
 
-        async for history_message in channel.history(limit=5000):
+        async for history_message in channel.history(limit=None, after=after):
             if not self.is_msg_from_me(history_message):
                 emoji_counter += self.count_emoji_in_msg(
                     emojis, history_message.content
