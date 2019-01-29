@@ -56,7 +56,7 @@ class DakaP(discord.Client):
                 await self._show_raw_message(message)
 
             elif command == 'clean':
-                await message.channel.purge(check=self._is_msg_from_me)
+                await self._clean_my_messages(message)
 
     async def _count_emojis(self, message):
         """Count the emojis in the guild."""
@@ -96,8 +96,24 @@ class DakaP(discord.Client):
     async def _show_raw_message(message):
         """Send the raw text of the message."""
         # '\u200b': Zero-width space
+        zero_width_space = '\u200b'
         await message.channel.send(
-            '```\n' + message.content.replace('`', '\u200b`') + '\n```')
+            f'```\n{message.content.replace("`", zero_width_space + "`")}\n```'
+        )
+
+    async def _clean_my_messages(self, message):
+        """Search for specific number of messages, and delete those sent by me."""
+
+        limit = 100
+        parameters = message.content.replace(self.prefix, '').strip().split()[1:]
+
+        if parameters:
+            try:
+                limit = int(parameters[0])
+            except ValueError:
+                pass
+
+        await message.channel.purge(limit=limit, check=self._is_msg_from_me)
 
     def _is_msg_from_me(self, message):
         """Check if the message is sent by this bot."""
