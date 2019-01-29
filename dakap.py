@@ -42,7 +42,7 @@ class DakaP(discord.Client):
             return
 
         if message.content.startswith(self.prefix):
-            command = message.content.replace(self.prefix, '').strip()
+            command = message.content.replace(self.prefix, '').strip().split(maxsplit=1)[0]
 
             logger.info(f'{message.guild}-{message.channel}: {command}')
 
