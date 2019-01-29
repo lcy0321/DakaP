@@ -52,6 +52,9 @@ class DakaP(discord.Client):
             elif command in ['emoji', 'emojis']:
                 await self._count_emojis(message)
 
+            elif command == 'raw':
+                await self._show_raw_message(message)
+
             elif command == 'clean':
                 await message.channel.purge(check=self._is_msg_from_me)
 
@@ -88,6 +91,13 @@ class DakaP(discord.Client):
                 ['\t'.join(column) for column in grouper(result, number=10, fillvalue='')]
             )
         )
+
+    @staticmethod
+    async def _show_raw_message(message):
+        """Send the raw text of the message."""
+        # '\u200b': Zero-width space
+        await message.channel.send(
+            '```\n' + message.content.replace('`', '\u200b`') + '\n```')
 
     def _is_msg_from_me(self, message):
         """Check if the message is sent by this bot."""
