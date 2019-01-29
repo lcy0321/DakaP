@@ -31,14 +31,14 @@ class DakaP(discord.Client):
 
     async def on_ready(self):
         """Triggered when ready."""
-        logger.info(f'Username: {self.user.name}')
-        logger.info(f'ID      : {self.user.id}')
+        logger.info(f'Username   : {self.user.name}')
+        logger.info(f'ID         : {self.user.id}')
         logger.info(f'In guild(s): {", ".join([guild.name for guild in self.guilds])}')
 
     async def on_message(self, message):
         """Triggered when a message start with specific prefix."""
 
-        if self._is_msg_from_me(message):
+        if message.author.bot:
             return
 
         if message.content.startswith(self.prefix):
