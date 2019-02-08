@@ -90,9 +90,9 @@ class DakaP(discord.Client):
             for emoji, count in sorted(emoji_counter.items(), key=itemgetter(1), reverse=True)
         ]
 
-        # Count from <UTC+8 datetime>
+        # Counted from <UTC+8 datetime>
         await message.channel.send(
-            (f'Count from '
+            (f'Counted from '
              f'{(start_time + timedelta(hours=8)).isoformat(sep=" ", timespec="seconds")}\n')
             + '\n'.join(
                 ['\t'.join(column) for column in grouper(result, number=10, fillvalue='')]
