@@ -11,7 +11,7 @@ from operator import itemgetter
 import discord
 
 logger = logging.getLogger(__name__)    # pylint: disable=invalid-name
-logger.setLevel(logging.INFO)
+logger.setLevel(logging.DEBUG)
 logging.basicConfig(format='%(asctime)s:%(levelname)-7s:%(message)s', datefmt='%Y-%m-%d %H:%M:%S')
 
 
@@ -90,6 +90,10 @@ class DakaP(discord.Client):
             for emoji, count in sorted(emoji_counter.items(), key=itemgetter(1), reverse=True)
         ]
 
+        if logger.isEnabledFor(logging.DEBUG):
+            for emoji_count in result:
+                logger.debug(emoji_count)
+
         # Counted from <UTC+8 datetime>
         await message.channel.send(
             (f'Counted from '
@@ -130,11 +134,14 @@ class DakaP(discord.Client):
         """Count emojis in the messages in the channel."""
         emoji_counter = Counter()
 
+        logger.debug(f'Start counting in #{channel.name}...')
+
         async for history_message in channel.history(limit=None, after=after):
             if not self._is_msg_from_me(history_message):
                 emoji_counter += self._count_emojis_in_msg(
                     emojis, history_message.content
                 )
+        logger.debug(f'Finish counting in #{channel.name}...')
 
         return emoji_counter
 
