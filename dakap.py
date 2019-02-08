@@ -70,13 +70,20 @@ class DakaP(discord.Client):
 
         start_time = datetime.utcnow() - timedelta(weeks=12)
 
+        counting_tasks = []
+
         for channel in message.guild.channels:
             if isinstance(channel, discord.TextChannel) and \
                     message.guild.me.permissions_in(channel).read_message_history:
 
-                emoji_counter += await self._count_emojis_in_channel(
-                    emojis, channel, after=start_time
-                )
+                counting_tasks.append(asyncio.create_task(
+                    self._count_emojis_in_channel(emojis, channel, after=start_time)
+                ))
+
+        emoji_counter = sum(
+            [await task for task in counting_tasks],
+            emoji_counter
+        )
 
         result = [
             f'{emoji}: {count - 1 :3}'
