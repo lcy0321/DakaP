@@ -139,18 +139,20 @@ class DakaP(discord.Client):
         async for history_message in channel.history(limit=None, after=after):
             if not self._is_msg_from_me(history_message):
                 emoji_counter += self._count_emojis_in_msg(
-                    emojis, history_message.content
+                    emojis, history_message
                 )
         logger.debug(f'Finish counting in #{channel.name}...')
 
         return emoji_counter
 
     @staticmethod
-    def _count_emojis_in_msg(emojis, message_content):
+    def _count_emojis_in_msg(emojis, message):
         """Count emojis in the message."""
         counter = Counter()
         for emoji in emojis:
-            if emoji in message_content:
+            if emoji in message.content:
+                counter[emoji] += 1
+            if emoji in [str(reaction.emoji) for reaction in message.reactions]:
                 counter[emoji] += 1
         return counter
 
