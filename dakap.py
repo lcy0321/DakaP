@@ -51,8 +51,11 @@ class DakaP(discord.Client):
 
             logger.info(f'{message.guild}-{message.channel}: {command}')
 
-            if command == 'bye':
-                await self.close()
+            if command == 'help':
+                await self._send_help(message)
+
+            # elif command == 'bye':
+            #     await self.close()
 
             elif command in ['emoji', 'emojis']:
                 await self._count_emojis(message)
@@ -63,8 +66,25 @@ class DakaP(discord.Client):
             elif command == 'choose':
                 await self._random_choice(message, arguments)
 
-            elif command == 'clean':
-                await self._clean_my_messages(message, arguments)
+            # elif command == 'clean':
+            #     await self._clean_my_messages(message, arguments)
+
+    async def _send_help(self, message):
+        """Send the help message of this bot"""
+        help_msgs = []
+        help_msgs.append('Source: https://github.com/lcy0321/DakaP')
+        help_msgs.append('```')
+        help_msgs.append('help')
+        help_msgs.append('        顯示說明')
+        help_msgs.append('emoji/emojis')
+        help_msgs.append('        計算伺服器內一定時間內各個 emoji 的數量')
+        help_msgs.append('raw <content>')
+        help_msgs.append('        顯示該則訊息在被格式化前的型態')
+        help_msgs.append('choose <item1> [<item2>...]')
+        help_msgs.append('        隨機選擇其中一個項目')
+        help_msgs.append('```')
+
+        await message.channel.send('\n'.join(help_msgs))
 
     async def _count_emojis(self, message):
         """Count the emojis in the guild."""
