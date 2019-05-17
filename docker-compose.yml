@@ -1,0 +1,8 @@
+version: "3.7"
+services:
+  dakap:
+    build: ./
+    image: dakap
+    environment:
+      TZ: Asia/Taipei
+    network_mode: "host"
