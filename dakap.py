@@ -27,7 +27,9 @@ def grouper(iterable, number, fillvalue=None):
 class DakaP(discord.Client):
     """A bot to count the emojis in the guild."""
 
-    prefix = '$'
+    def __init__(self, prefix='$'):
+        self.prefix = prefix
+        super().__init__()
 
     async def on_ready(self):
         """Triggered when ready."""
