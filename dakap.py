@@ -1,4 +1,4 @@
-"""A bot to count the emojis in a guild."""
+"""A Discord bot made by lcy"""
 
 import asyncio
 import logging
@@ -26,7 +26,7 @@ def grouper(iterable, number, fillvalue=None):
 
 
 class DakaP(discord.Client):
-    """A bot to count the emojis in the guild."""
+    """A Discord bot made by lcy"""
 
     def __init__(self, prefix='$'):
         self.prefix = prefix
