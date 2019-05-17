@@ -2,6 +2,7 @@
 
 import asyncio
 import logging
+import random
 import signal
 from collections import Counter
 from datetime import datetime, timedelta
@@ -56,6 +57,9 @@ class DakaP(discord.Client):
 
             elif command == 'raw':
                 await self._show_raw_message(message)
+
+            elif command == 'choose':
+                await self._random_choice(message)
 
             elif command == 'clean':
                 await self._clean_my_messages(message)
@@ -118,15 +122,32 @@ class DakaP(discord.Client):
         """Search for specific number of messages, and delete those sent by me."""
 
         limit = 100
-        parameters = message.content.replace(self.prefix, '').strip().split()[1:]
+        arguments = self._parse_arguments(message)[1:]
 
-        if parameters:
+        if arguments:
             try:
-                limit = int(parameters[0])
+                limit = int(arguments[0])
             except ValueError:
                 pass
 
         await message.channel.purge(limit=limit, check=self._is_msg_from_me)
+
+    async def _random_choice(self, message):
+        """Randomly choose the items from the given list"""
+
+        arguments = self._parse_arguments(message)[1:]
+
+        if arguments:
+            choice = random.choice(arguments)
+            await message.channel.send(
+                f'> {choice}'
+            )
+
+    # Help functions
+
+    def _parse_arguments(self, message, sep=None):
+        """Parse the arguments in the message"""
+        return message.content.replace(self.prefix, '').strip().split(sep=sep)
 
     def _is_msg_from_me(self, message):
         """Check if the message is sent by this bot."""
