@@ -44,8 +44,10 @@ class DakaP(discord.Client):
         if message.author.bot:
             return
 
-        if message.content.startswith(self.prefix):
-            command = message.content.replace(self.prefix, '').strip().split(maxsplit=1)[0]
+        arguments = self._parse_arguments(message)
+
+        if arguments:
+            command = arguments[0]
 
             logger.info(f'{message.guild}-{message.channel}: {command}')
 
@@ -59,10 +61,10 @@ class DakaP(discord.Client):
                 await self._show_raw_message(message)
 
             elif command == 'choose':
-                await self._random_choice(message)
+                await self._random_choice(message, arguments)
 
             elif command == 'clean':
-                await self._clean_my_messages(message)
+                await self._clean_my_messages(message, arguments)
 
     async def _count_emojis(self, message):
         """Count the emojis in the guild."""
@@ -118,27 +120,24 @@ class DakaP(discord.Client):
             f'```\n{message.content.replace("`", zero_width_space + "`")}\n```'
         )
 
-    async def _clean_my_messages(self, message):
+    async def _clean_my_messages(self, message, arguments):
         """Search for specific number of messages, and delete those sent by me."""
 
         limit = 100
-        arguments = self._parse_arguments(message)[1:]
 
-        if arguments:
+        if arguments[1:]:
             try:
-                limit = int(arguments[0])
+                limit = int(arguments[1])
             except ValueError:
                 pass
 
         await message.channel.purge(limit=limit, check=self._is_msg_from_me)
 
-    async def _random_choice(self, message):
+    async def _random_choice(self, message, arguments):
         """Randomly choose the items from the given list"""
 
-        arguments = self._parse_arguments(message)[1:]
-
-        if arguments:
-            choice = random.choice(arguments)
+        if arguments[1:]:
+            choice = random.choice(arguments[1:])
             await message.channel.send(
                 f'> {choice}'
             )
@@ -146,8 +145,25 @@ class DakaP(discord.Client):
     # Help functions
 
     def _parse_arguments(self, message, sep=None):
-        """Parse the arguments in the message"""
-        return message.content.replace(self.prefix, '').strip().split(sep=sep)
+        """Parse the arguments in the message if it starts with the prefix"""
+
+        message_stripped = message.content.strip()
+
+        if not message_stripped.startswith(self.prefix):
+            return []
+
+        arguments = message_stripped.split(sep=sep)
+
+        arguments = [argument.strip() for argument in arguments]
+
+        if arguments[0] == '$':
+            # e.g. $ command arg1 arg2
+            arguments = arguments[1:]
+        else:
+            # e.g. $command arg1 arg2
+            arguments[0] = arguments[0][1:]
+
+        return arguments
 
     def _is_msg_from_me(self, message):
         """Check if the message is sent by this bot."""
