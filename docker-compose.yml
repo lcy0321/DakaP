@@ -6,3 +6,4 @@ services:
     environment:
       TZ: Asia/Taipei
     network_mode: "host"
+    restart: unless-stopped
