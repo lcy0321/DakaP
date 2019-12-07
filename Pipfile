@@ -10,7 +10,7 @@ flake8 = "*"
 rope = "*"
 
 [packages]
-discord-py = {git = "https://github.com/Rapptz/discord.py"}
+discord-py = "*"
 
 [requires]
 python_version = "3.7"
