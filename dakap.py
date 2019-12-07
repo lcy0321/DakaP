@@ -4,10 +4,11 @@ import asyncio
 import logging
 import random
 import signal
-from collections import Counter
+from collections import Counter as counter
 from datetime import datetime, timedelta
 from itertools import zip_longest
 from operator import itemgetter
+from typing import Counter, Iterable, Iterator, List, Sequence, Tuple, TypeVar
 
 import discord
 
@@ -15,8 +16,10 @@ logger = logging.getLogger(__name__)    # pylint: disable=invalid-name
 logger.setLevel(logging.DEBUG)
 logging.basicConfig(format='%(asctime)s:%(levelname)-7s:%(message)s', datefmt='%Y-%m-%d %H:%M:%S')
 
+T = TypeVar('T')    # pylint: disable=invalid-name
 
-def grouper(iterable, number, fillvalue=None):
+
+def grouper(iterable: Iterable[T], number: int, fillvalue: T = None) -> Iterator[Tuple[T]]:
     """
     From https://docs.python.org/3/library/itertools.html#itertools-recipes
     Collect data into fixed-length chunks or blocks"""
@@ -28,17 +31,17 @@ def grouper(iterable, number, fillvalue=None):
 class DakaP(discord.Client):
     """A Discord bot made by lcy"""
 
-    def __init__(self, prefix='$'):
+    def __init__(self, prefix: str = '$'):
         self.prefix = prefix
         super().__init__()
 
-    async def on_ready(self):
+    async def on_ready(self) -> None:
         """Triggered when ready."""
         logger.info(f'Username   : {self.user.name}')
         logger.info(f'ID         : {self.user.id}')
         logger.info(f'In guild(s): {", ".join([guild.name for guild in self.guilds])}')
 
-    async def on_message(self, message):
+    async def on_message(self, message: discord.Message) -> None:
         """Triggered when a message start with specific prefix."""
 
         if message.author.bot:
@@ -69,7 +72,7 @@ class DakaP(discord.Client):
             # elif command == 'clean':
             #     await self._clean_my_messages(message, arguments)
 
-    async def _send_help(self, message):
+    async def _send_help(self, message: discord.Message) -> None:
         """Send the help message of this bot"""
         help_msgs = []
         help_msgs.append('Source: https://github.com/lcy0321/DakaP')
@@ -86,7 +89,7 @@ class DakaP(discord.Client):
 
         await message.channel.send('\n'.join(help_msgs))
 
-    async def _count_emojis(self, message):
+    async def _count_emojis(self, message: discord.Message) -> None:
         """Count the emojis in the guild."""
 
         # await message.channel.send(
@@ -134,7 +137,7 @@ class DakaP(discord.Client):
             ))
 
     @staticmethod
-    async def _show_raw_message(message):
+    async def _show_raw_message(message: discord.Message) -> None:
         """Send the raw text of the message."""
         # '\u200b': Zero-width space
         zero_width_space = '\u200b'
@@ -142,7 +145,7 @@ class DakaP(discord.Client):
             f'```\n{message.content.replace("`", zero_width_space + "`")}\n```'
         )
 
-    async def _clean_my_messages(self, message, arguments):
+    async def _clean_my_messages(self, message: discord.Message, arguments: Sequence[str]) -> None:
         """Search for specific number of messages, and delete those sent by me."""
 
         limit = 100
@@ -155,7 +158,7 @@ class DakaP(discord.Client):
 
         await message.channel.purge(limit=limit, check=self._is_msg_from_me)
 
-    async def _random_choice(self, message, arguments):
+    async def _random_choice(self, message: discord.Message, arguments: Sequence[str]) -> None:
         """Randomly choose the items from the given list"""
 
         if arguments[1:]:
@@ -164,7 +167,7 @@ class DakaP(discord.Client):
 
     # Help functions
 
-    def _parse_arguments(self, message, sep=None):
+    def _parse_arguments(self, message: discord.Message, sep: str = None) -> List[str]:
         """Parse the arguments in the message if it starts with the prefix"""
 
         message_stripped = message.content.strip()
@@ -185,13 +188,15 @@ class DakaP(discord.Client):
 
         return arguments
 
-    def _is_msg_from_me(self, message):
+    def _is_msg_from_me(self, message: discord.Message) -> bool:
         """Check if the message is sent by this bot."""
         return message.author.id == self.user.id
 
-    async def _count_emojis_in_channel(self, emojis, channel, after):
+    async def _count_emojis_in_channel(
+            self, emojis: List[discord.Emoji], channel: discord.TextChannel, after: datetime
+    ) -> Counter[str]:
         """Count emojis in the messages in the channel."""
-        emoji_counter = Counter()
+        emoji_counter: Counter[discord.Emoji] = counter()
 
         logger.debug(f'Start counting in #{channel.name}...')
 
@@ -205,15 +210,17 @@ class DakaP(discord.Client):
         return emoji_counter
 
     @staticmethod
-    def _count_emojis_in_msg(emojis, message):
+    def _count_emojis_in_msg(
+            emojis: Iterable[discord.Emoji], message: discord.Message
+    ) -> Counter[discord.Emoji]:
         """Count emojis in the message."""
-        counter = Counter()
+        emoji_counter: Counter[discord.Emoji] = counter()
         for emoji in emojis:
             if emoji in message.content:
-                counter[emoji] += 1
+                emoji_counter[emoji] += 1
             if emoji in [str(reaction.emoji) for reaction in message.reactions]:
-                counter[emoji] += 1
-        return counter
+                emoji_counter[emoji] += 1
+        return emoji_counter
 
 
 def main():
