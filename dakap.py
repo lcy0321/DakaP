@@ -89,47 +89,49 @@ class DakaP(discord.Client):
     async def _count_emojis(self, message):
         """Count the emojis in the guild."""
 
-        await message.channel.send(
-            f'Start counting emojis in {message.guild.name}...'
-        )
+        # await message.channel.send(
+        #     f'Start counting emojis in {message.guild.name}...'
+        # )
 
-        emojis = [str(emoji) for emoji in message.guild.emojis]
-        emoji_counter = Counter(emojis)     # Counter starts from 1
+        with message.channel.typing():
 
-        start_time = datetime.utcnow() - timedelta(weeks=12)
+            emojis = [str(emoji) for emoji in message.guild.emojis]
+            emoji_counter = Counter(emojis)     # Counter starts from 1
 
-        counting_tasks = []
+            start_time = datetime.utcnow() - timedelta(weeks=12)
 
-        for channel in message.guild.channels:
-            if isinstance(channel, discord.TextChannel) and \
-                    message.guild.me.permissions_in(channel).read_message_history:
+            counting_tasks = []
 
-                counting_tasks.append(asyncio.create_task(
-                    self._count_emojis_in_channel(emojis, channel, after=start_time)
-                ))
+            for channel in message.guild.channels:
+                if isinstance(channel, discord.TextChannel) and \
+                        message.guild.me.permissions_in(channel).read_message_history:
 
-        emoji_counter = sum(
-            [await task for task in counting_tasks],
-            emoji_counter
-        )
+                    counting_tasks.append(asyncio.create_task(
+                        self._count_emojis_in_channel(emojis, channel, after=start_time)
+                    ))
 
-        result = [
-            f'{emoji}: {count - 1 :3}'
-            for emoji, count in sorted(emoji_counter.items(), key=itemgetter(1), reverse=True)
-        ]
-
-        if logger.isEnabledFor(logging.DEBUG):
-            for emoji_count in result:
-                logger.debug(emoji_count)
-
-        # Counted from <UTC+8 datetime>
-        await message.channel.send(
-            (f'Counted from '
-             f'{(start_time + timedelta(hours=8)).isoformat(sep=" ", timespec="seconds")}\n')
-            + '\n'.join(
-                ['\t'.join(column) for column in grouper(result, number=10, fillvalue='')]
+            emoji_counter = sum(
+                [await task for task in counting_tasks],
+                emoji_counter
             )
-        )
+
+            result = [
+                f'{emoji}: {count - 1 :3}'
+                for emoji, count in sorted(emoji_counter.items(), key=itemgetter(1), reverse=True)
+            ]
+
+            if logger.isEnabledFor(logging.DEBUG):
+                for emoji_count in result:
+                    logger.debug(emoji_count)
+
+            # Counted from <UTC+8 datetime>
+            await message.channel.send('\n'.join(
+                [(
+                    f'Counted from '
+                    f'{(start_time + timedelta(hours=8)).isoformat(sep=" ", timespec="seconds")}'
+                )]
+                + ['\t'.join(column) for column in grouper(result, number=10, fillvalue='')]
+            ))
 
     @staticmethod
     async def _show_raw_message(message):
@@ -158,9 +160,7 @@ class DakaP(discord.Client):
 
         if arguments[1:]:
             choice = random.choice(arguments[1:])
-            await message.channel.send(
-                f'> {choice}'
-            )
+            await message.channel.send(f'> {choice}')
 
     # Help functions
 
