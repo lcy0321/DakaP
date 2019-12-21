@@ -10,6 +10,7 @@ import discord
 
 from .common import CommandFunc
 from .count_emojis import count_emojis
+from .get_time import get_time
 from .misc import random_choice, show_raw_message
 
 logger = logging.getLogger(__name__)    # pylint: disable=invalid-name
@@ -61,6 +62,9 @@ class DakaP(discord.Client):
             elif command == 'choose':
                 command_func = random_choice
 
+            elif command == 'time':
+                command_func = get_time
+
             # elif command == 'clean':
             #     await self._clean_my_messages(message, arguments)
 
@@ -83,11 +87,11 @@ class DakaP(discord.Client):
         help_msgs.append('        顯示該則訊息在被格式化前的型態')
         help_msgs.append('choose <item1> [<item2>...]')
         help_msgs.append('        隨機選擇其中一個項目')
+        help_msgs.append('time [<time>]')
+        help_msgs.append('        顯示不同時區中的現在時間或特定時間')
         help_msgs.append('```')
 
         await message.channel.send('\n'.join(help_msgs))
-
-    # Help functions
 
     def _parse_arguments(self, message: discord.Message) -> List[str]:
         """Parse the arguments in the message if it starts with the prefix"""
