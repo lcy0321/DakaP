@@ -1,3 +1,3 @@
 FROM kennethreitz/pipenv
-COPY bot-token Pipfile Pipfile.lock dakap.py /app/
-CMD ["python", "./dakap.py"]
+COPY . /app/
+CMD ["python3", "-m", "dakap.dakap"]
