@@ -43,7 +43,7 @@ class DakaP(discord.Client):
 
         if arguments:
             command_func: CommandFunc = self._nope
-            command = arguments[0]
+            command = arguments[0].lower()
 
             logger.info(f'{message.guild}-{message.channel}: {command}')
 
