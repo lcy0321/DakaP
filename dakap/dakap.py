@@ -39,36 +39,38 @@ class DakaP(discord.Client):
         if message.author.bot:
             return
 
-        arguments = self._parse_arguments(message)
+        for message_line in message.content.splitlines():
 
-        if arguments:
-            command_func: CommandFunc = self._nope
-            command = arguments[0].lower()
+            arguments = self._parse_arguments(message_line)
 
-            logger.info(f'{message.guild}-{message.channel}: {command}')
+            if arguments:
+                command_func: CommandFunc = self._nope
+                command = arguments[0].lower()
 
-            if command == 'help':
-                await self._send_help(message)
+                logger.info(f'{message.guild}-{message.channel}: {command}')
 
-            # elif command == 'bye':
-            #     await self.close()
+                if command == 'help':
+                    await self._send_help(message)
 
-            elif command in ['emoji', 'emojis']:
-                command_func = count_emojis
+                # elif command == 'bye':
+                #     await self.close()
 
-            elif command == 'raw':
-                command_func = show_raw_message
+                elif command in ['emoji', 'emojis']:
+                    command_func = count_emojis
 
-            elif command == 'choose':
-                command_func = random_choice
+                elif command == 'raw':
+                    command_func = show_raw_message
 
-            elif command == 'time':
-                command_func = get_time
+                elif command == 'choose':
+                    command_func = random_choice
 
-            # elif command == 'clean':
-            #     await self._clean_my_messages(message, arguments)
+                elif command == 'time':
+                    command_func = get_time
 
-            await command_func(self, message, arguments)
+                # elif command == 'clean':
+                #     await self._clean_my_messages(message, arguments)
+
+                await command_func(self, message, arguments)
 
     @staticmethod
     async def _nope(_client, _message, _arguments) -> None:
@@ -93,10 +95,10 @@ class DakaP(discord.Client):
 
         await message.channel.send('\n'.join(help_msgs))
 
-    def _parse_arguments(self, message: discord.Message) -> List[str]:
+    def _parse_arguments(self, message_line: str) -> List[str]:
         """Parse the arguments in the message if it starts with the prefix"""
 
-        message_stripped = message.content.strip()
+        message_stripped = message_line.strip()
 
         if not message_stripped.startswith(self.prefix):
             return []

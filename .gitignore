@@ -1,2 +1,3 @@
 /.vscode
+/.mypy_cache
 /bot-token
