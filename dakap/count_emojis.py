@@ -84,15 +84,17 @@ async def _count_emojis_in_channel(
 ) -> Counter[str]:
     """Count emojis in the messages in the channel."""
     emoji_counter: Counter[discord.Emoji] = counter()
+    msg_count = 0
 
     logger.debug(f'Start counting in #{channel.name}...')
 
     async for history_message in channel.history(limit=None, after=after):
         if not is_msg_from_me(client, history_message):
+            msg_count += 1
             emoji_counter += _count_emojis_in_msg(
                 emojis, history_message
             )
-    logger.debug(f'Finish counting in #{channel.name}...')
+    logger.debug(f'Finish counting {msg_count} message(s) in #{channel.name}...')
 
     return emoji_counter
 
