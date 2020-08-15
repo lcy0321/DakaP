@@ -3,7 +3,7 @@
 import asyncio
 import logging
 from collections import Counter as counter
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from itertools import zip_longest
 from operator import itemgetter
 from typing import Counter, Iterable, Iterator, List, Tuple, TypeVar
@@ -40,6 +40,7 @@ async def count_emojis(
         emojis = [str(emoji) for emoji in message.guild.emojis]
         emoji_counter = counter(emojis)     # Counter starts from 1
 
+        # discord library expects a timezone-naive datetime
         start_time = datetime.utcnow() - timedelta(weeks=12)
 
         counting_tasks = []
@@ -67,13 +68,17 @@ async def count_emojis(
                 logger.debug(emoji_count)
 
         # Counted from <UTC+8 datetime>
-        await message.channel.send('\n'.join(
+        tw_timezone = timezone(offset=timedelta(hours=8))
+        start_tw_time = start_time.replace(tzinfo=timezone.utc).astimezone(tz=tw_timezone)
+        message_lines = (
             [(
-                f'Counted from '
-                f'{(start_time + timedelta(hours=8)).isoformat(sep=" ", timespec="seconds")}'
+                f'Counted from {start_tw_time.isoformat(sep=" ", timespec="seconds")}'
             )]
             + ['\t'.join(column) for column in grouper(result, number=10, fillvalue='')]
-        ))
+        )
+
+        for message_line in message_lines:
+            await message.channel.send(message_line)
 
 
 async def _count_emojis_in_channel(
