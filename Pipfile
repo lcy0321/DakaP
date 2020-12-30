@@ -13,6 +13,7 @@ mypy = "*"
 [packages]
 discord-py = "*"
 python-dateutil = "*"
+discord-py-slash-command = "*"
 
 [requires]
 python_version = "3.7"

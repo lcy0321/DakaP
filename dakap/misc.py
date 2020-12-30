@@ -2,51 +2,46 @@
 
 import random
 from functools import partial
-from typing import Sequence
+from typing import Optional, Tuple
+from discord.channel import TextChannel
 
-import discord
+from discord.message import Message
 
-from .common import is_msg_from_me
+from .common import is_msg_from_this_bot
 
 
 async def show_raw_message(
-        _client,
-        message: discord.Message,
-        _arguments,
+        channel: TextChannel,
+        message: Message,
 ) -> None:
     """Send the raw text of the message."""
     # '\u200b': Zero-width space
     zero_width_space = '\u200b'
-    await message.channel.send(
+    await channel.send(
         f'```\n{message.content.replace("`", zero_width_space + "`")}\n```'
     )
 
 
 async def clean_my_messages(
-        client: discord.Client,
-        message: discord.Message,
-        arguments: Sequence[str]
+        channel: TextChannel,
+        limit: Optional[int],
 ) -> None:
-    """Search for specific number of messages, and delete those sent by me."""
+    """Search for specific number of messages, and delete those sent by this bot."""
 
-    limit = 100
+    if limit is not None:
+        purge_limit = limit
+    else:
+        purge_limit = 100
 
-    if arguments[1:]:
-        try:
-            limit = int(arguments[1])
-        except ValueError:
-            pass
-
-    await message.channel.purge(limit=limit, check=partial(is_msg_from_me, client))
+    await channel.purge(limit=purge_limit, check=partial(is_msg_from_this_bot, channel.guild))
 
 
 async def random_choice(
-        _client,
-        message: discord.Message,
-        arguments: Sequence[str]
+        channel: TextChannel,
+        options: Tuple[str, ...],
 ) -> None:
     """Randomly choose the items from the given list"""
 
-    if arguments[1:]:
-        choice = random.choice(arguments[1:])
-        await message.channel.send(f'> {choice}')
+    if options[0:]:
+        choice = random.choice(options[0:])
+        await channel.send(f'> {choice}')
