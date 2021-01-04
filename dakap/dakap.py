@@ -137,6 +137,10 @@ async def slash_emoji(ctx: SlashContext):
         return await count_emojis(send=_wrap_slash_context_send(ctx=ctx), guild=ctx.guild)
 
 
+@slash.slash(name='time', description='Get time in different time zones.')
+async def slash_time(ctx: SlashContext, *time_args: str):
+    """Get time in different time zones."""
+    return await get_time(send=_wrap_slash_context_send(ctx=ctx, hidden=True), time_args=time_args)
 
 
 def main():
