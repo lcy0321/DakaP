@@ -3,21 +3,21 @@
 import random
 from functools import partial
 from typing import Optional, Tuple
-from discord.channel import TextChannel
 
+from discord.channel import TextChannel
 from discord.message import Message
 
-from .common import is_msg_from_this_bot
+from .common import SendFunc, is_msg_from_this_bot
 
 
 async def show_raw_message(
-        channel: TextChannel,
+        send: SendFunc,
         message: Message,
 ) -> None:
     """Send the raw text of the message."""
     # '\u200b': Zero-width space
     zero_width_space = '\u200b'
-    await channel.send(
+    await send(
         f'```\n{message.content.replace("`", zero_width_space + "`")}\n```'
     )
 
@@ -37,11 +37,11 @@ async def clean_my_messages(
 
 
 async def random_choice(
-        channel: TextChannel,
+        send: SendFunc,
         options: Tuple[str, ...],
 ) -> None:
     """Randomly choose the items from the given list"""
 
     if options[0:]:
         choice = random.choice(options[0:])
-        await channel.send(f'> {choice}')
+        await send(f'> {choice}')

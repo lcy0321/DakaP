@@ -2,10 +2,11 @@
 
 from datetime import datetime
 from typing import Sequence
-from discord.channel import TextChannel
 
 from dateutil import parser
 from dateutil.tz import UTC, gettz
+
+from .common import SendFunc
 
 # TIME_FORMAT = '%Y-%m-%d %I:%M:%S%p'
 TIME_FORMAT = '%Y-%m-%d %H:%M:%S'
@@ -18,7 +19,7 @@ DEFAULT_TIMEZONE_NAME = 'Asia/Taipei'
 
 
 async def get_time(
-        channel: TextChannel,
+        send: SendFunc,
         time_args: Sequence[str],
 ) -> None:
     """Get time in different time zones"""
@@ -33,7 +34,7 @@ async def get_time(
             utc_time = _get_from_time(' '.join(time_args).upper())
         except parser.ParserError:      # type: ignore
             # Parse error
-            await channel.send('```Parse Error```')
+            await send('```Parse Error```')
             return
 
     # `datetime`s in each timezone
@@ -48,7 +49,7 @@ async def get_time(
     ]
     msg.append('```')
 
-    await channel.send('\n'.join(msg))
+    await send('\n'.join(msg))
 
 
 def _get_current_time() -> datetime:
