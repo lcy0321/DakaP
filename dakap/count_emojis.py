@@ -36,7 +36,7 @@ def grouper(iterable: Iterable[T], number: int, fillvalue: T = None) -> Iterator
 async def count_emojis(
         client: discord.Client,
         message: discord.Message,
-        _arguments
+        _arguments,
 ) -> None:
     """Count the emojis in the guild."""
 
@@ -55,7 +55,7 @@ async def count_emojis(
                 emojis=emojis,
                 after=start_time,
             ))
-            for channel in message.guild.text_channels
+            for channel in message.guild.text_channels + message.guild.threads
             if channel.permissions_for(channel.guild.me).read_message_history
         ]
 
@@ -94,7 +94,7 @@ async def count_emojis(
 
 async def _count_emojis_in_channel(
         client: discord.Client,
-        channel: discord.TextChannel,
+        channel: discord.abc.Messageable,
         emojis: Iterable[discord.Emoji],
         after: datetime,
 ) -> EmojiCountResult:

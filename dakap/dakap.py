@@ -31,7 +31,9 @@ class DakaP(discord.Client):
         """Triggered when ready."""
         logger.info(f'Username   : {self.user.name}')
         logger.info(f'ID         : {self.user.id}')
-        logger.info(f'In guild(s): {", ".join([guild.name for guild in self.guilds])}')
+        logger.info(
+            f'In guild(s): {", ".join([f"{guild.name}({guild.id})" for guild in self.guilds])}'
+        )
 
     async def on_message(self, message: discord.Message) -> None:
         """Triggered when a message start with specific prefix."""

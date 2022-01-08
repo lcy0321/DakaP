@@ -9,10 +9,11 @@ ipython = "*"
 flake8 = "*"
 rope = "*"
 mypy = "*"
+types-python-dateutil = "*"
 
 [packages]
-discord-py = "*"
 python-dateutil = "*"
+py-cord = {ref = "02e346dbf05086bcf3358e3706df8c41329ea8ba", git = "https://github.com/Pycord-Development/pycord"}
 
 [requires]
-python_version = "3.7"
+python_version = "3.9"
