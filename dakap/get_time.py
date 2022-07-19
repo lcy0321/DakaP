@@ -34,7 +34,7 @@ async def get_time(
             utc_time = _get_from_time(' '.join(arguments[1:]).upper())
         except parser.ParserError:      # type: ignore
             # Parse error
-            await message.channel.send('```Parse Error```')
+            await message.reply('```Parse Error```')
             return
 
     # `datetime`s in each timezone
@@ -49,7 +49,7 @@ async def get_time(
     ]
     msg.append('```')
 
-    await message.channel.send('\n'.join(msg))
+    await message.reply('\n'.join(msg))
 
 
 def _get_current_time() -> datetime:

@@ -68,7 +68,7 @@ async def count_emojis(
         await _send_emoji_count_summary(
             emoji_count_results=counting_results,
             start_time=start_time,
-            channel_to_send=message.channel,
+            message_to_reply=message,
         )
         await _send_emoji_count_result(
             emoji_counter=emoji_counter,
@@ -122,7 +122,7 @@ def _count_emojis_in_msg(
 async def _send_emoji_count_summary(
     emoji_count_results: Collection[EmojiCountResult],
     start_time: datetime,
-    channel_to_send: discord.abc.Messageable,
+    message_to_reply: discord.Message,
 ) -> None:
     message_lines = []
 
@@ -150,7 +150,7 @@ async def _send_emoji_count_summary(
         '```',
     ]
 
-    await channel_to_send.send('\n'.join(message_lines))
+    await message_to_reply.reply('\n'.join(message_lines))
 
 
 async def _send_emoji_count_result(

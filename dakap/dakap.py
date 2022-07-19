@@ -95,7 +95,7 @@ class DakaP(discord.Client):
         help_msgs.append('        顯示不同時區中的現在時間或特定時間')
         help_msgs.append('```')
 
-        await message.channel.send('\n'.join(help_msgs))
+        await message.reply('\n'.join(help_msgs))
 
     def _parse_arguments(self, message_line: str) -> List[str]:
         """Parse the arguments in the message if it starts with the prefix"""

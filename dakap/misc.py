@@ -17,7 +17,7 @@ async def show_raw_message(
     """Send the raw text of the message."""
     # '\u200b': Zero-width space
     zero_width_space = '\u200b'
-    await message.channel.send(
+    await message.reply(
         f'```\n{message.content.replace("`", zero_width_space + "`")}\n```'
     )
 
@@ -49,4 +49,4 @@ async def random_choice(
 
     if arguments[1:]:
         choice = random.choice(arguments[1:])
-        await message.channel.send(f'> {choice}')
+        await message.reply(f'> {choice}')
