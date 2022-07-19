@@ -1,14 +1,15 @@
 # Generate requirements.txt
-FROM python:3.9 as micropipenv
+FROM python:3.10 as micropipenv
 
 RUN pip install micropipenv
 
 COPY Pipfile.lock .
-RUN micropipenv requirements --no-dev --no-hashes > requirements.txt
+RUN micropipenv requirements --no-dev --no-hashes > requirements.txt \
+    && cat requirements.txt
 
 
 # Final container
-FROM python:3.9
+FROM python:3.10
 
 WORKDIR /app
 

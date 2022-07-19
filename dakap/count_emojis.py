@@ -12,7 +12,7 @@ from typing import (Collection, Counter, Iterable, Iterator, NamedTuple, Tuple,
 
 import discord
 
-from .common import is_msg_from_me
+from .common import SupportChannel, is_msg_from_me
 
 logger = logging.getLogger(__name__)    # pylint: disable=invalid-name
 logger.setLevel(logging.DEBUG)
@@ -21,7 +21,7 @@ logger.setLevel(logging.DEBUG)
 class EmojiCountResult(NamedTuple):
     channel_name: str
     message_count: int
-    emoji_counter: Counter[str]
+    emoji_counter: Counter[discord.Emoji]
 
 
 T = TypeVar('T')    # pylint: disable=invalid-name
@@ -33,7 +33,7 @@ def grouper(iterable: Iterable[T], number: int, fillvalue: T = None) -> Iterator
     Collect data into fixed-length chunks or blocks"""
     # grouper('ABCDEFG', 3, 'x') --> ABC DEF Gxx"
     args = [iter(iterable)] * number
-    return zip_longest(*args, fillvalue=fillvalue)
+    return zip_longest(*args, fillvalue=fillvalue)      # type: ignore
 
 
 async def count_emojis(
@@ -43,22 +43,29 @@ async def count_emojis(
 ) -> None:
     """Count the emojis in the guild."""
 
-    with message.channel.typing():
+    if not message.guild:
+        raise ValueError('Invalid message.guild')
 
-        emojis = [str(emoji) for emoji in message.guild.emojis]
-        emoji_counter = counter(emojis)     # A counter contains all the emojis and starts from 1
+    async with message.channel.typing():
+
+        emoji_counter = counter(message.guild.emojis)
+        """A counter contains all the emojis and starts from 1"""
 
         # discord library expects a timezone-naive datetime
         start_time = datetime.utcnow() - timedelta(weeks=12)
+
+        channels: list[discord.TextChannel | discord.Thread] = []
+        channels += list(message.guild.text_channels)
+        channels += list(message.guild.threads)
 
         counting_tasks = [
             asyncio.create_task(_count_emojis_in_channel(
                 client=client,
                 channel=channel,
-                emojis=emojis,
+                emojis=message.guild.emojis,
                 after=start_time,
             ))
-            for channel in message.guild.text_channels + message.guild.threads
+            for channel in channels
             if channel.permissions_for(channel.guild.me).read_message_history
         ]
 
@@ -78,7 +85,7 @@ async def count_emojis(
 
 async def _count_emojis_in_channel(
         client: discord.Client,
-        channel: discord.abc.Messageable,
+        channel: SupportChannel,
         emojis: Iterable[discord.Emoji],
         after: datetime,
 ) -> EmojiCountResult:
@@ -112,9 +119,9 @@ def _count_emojis_in_msg(
     """Count emojis in the message."""
     emoji_counter: Counter[discord.Emoji] = counter()
     for emoji in emojis:
-        if emoji in message.content:
+        if str(emoji) in message.content:
             emoji_counter[emoji] += 1
-        if emoji in [str(reaction.emoji) for reaction in message.reactions]:
+        if str(emoji) in [str(reaction.emoji) for reaction in message.reactions]:
             emoji_counter[emoji] += 1
     return emoji_counter
 
@@ -154,12 +161,12 @@ async def _send_emoji_count_summary(
 
 
 async def _send_emoji_count_result(
-    emoji_counter: Counter[str],
+    emoji_counter: Counter[discord.Emoji],
     channel_to_send: discord.abc.Messageable,
 ) -> None:
 
     emoji_count_strs = [
-        f'{emoji}: {count - 1 :3}'
+        f'{str(emoji)}: {count - 1 :3}'
         for emoji, count in sorted(emoji_counter.items(), key=itemgetter(1), reverse=True)
     ]
 

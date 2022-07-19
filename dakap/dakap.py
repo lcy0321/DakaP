@@ -3,7 +3,6 @@
 import asyncio
 import logging
 import shlex
-import signal
 from typing import List, TypeVar
 
 import discord
@@ -25,10 +24,18 @@ class DakaP(discord.Client):
 
     def __init__(self, prefix: str = '$'):
         self.prefix = prefix
-        super().__init__()
+        super().__init__(intents=discord.Intents(
+            guilds=True,
+            emojis_and_stickers=True,
+            guild_messages=True,
+            guild_reactions=True,
+            message_content=True,
+        ))
 
     async def on_ready(self) -> None:
         """Triggered when ready."""
+        if not self.user:
+            raise RuntimeError('User not ready.')
         logger.info(f'Username   : {self.user.name}')
         logger.info(f'ID         : {self.user.id}')
         logger.info(
@@ -120,19 +127,11 @@ class DakaP(discord.Client):
 def main():
     """Run the bot with the token."""
 
-    with open('bot-token') as token_file:
+    with open('bot-token', encoding='utf-8') as token_file:
         token = token_file.read().strip()
 
     client = DakaP()
-
-    # Work-around: discord.Client.close() has some issues.
-    # like "Unclosed client session", "Unclosed connector", "Task was destroyed but it is pending!"
-    # client.run(token)
-
-    loop = asyncio.get_event_loop()
-    loop.add_signal_handler(signal.SIGINT, lambda: asyncio.ensure_future(client.close()))
-    loop.add_signal_handler(signal.SIGTERM, lambda: asyncio.ensure_future(client.close()))
-    loop.run_until_complete(client.start(token))
+    asyncio.run(client.start(token))
 
 
 if __name__ == "__main__":
