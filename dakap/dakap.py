@@ -11,6 +11,7 @@ from .common import CommandFunc
 from .count_emojis import count_emojis
 from .get_time import get_time
 from .misc import random_choice, show_raw_message
+from .youtube_thumbnail import reply_youtube_thumbnail
 
 logger = logging.getLogger(__name__)    # pylint: disable=invalid-name
 logger.setLevel(logging.DEBUG)
@@ -64,7 +65,7 @@ class DakaP(discord.Client):
                 # elif command == 'bye':
                 #     await self.close()
 
-                elif command in ['emoji', 'emojis']:
+                elif command in ('emoji', 'emojis'):
                     command_func = count_emojis
 
                 elif command == 'raw':
@@ -75,6 +76,9 @@ class DakaP(discord.Client):
 
                 elif command == 'time':
                     command_func = get_time
+
+                elif command in ('yt', 'youtube'):
+                    command_func = reply_youtube_thumbnail
 
                 # elif command == 'clean':
                 #     await self._clean_my_messages(message, arguments)
@@ -100,6 +104,8 @@ class DakaP(discord.Client):
         help_msgs.append('        隨機選擇其中一個項目')
         help_msgs.append('time [<time>]')
         help_msgs.append('        顯示不同時區中的現在時間或特定時間')
+        help_msgs.append('yt/youtube <YouTube URL>')
+        help_msgs.append('        顯示該 YouTube 影片最新的縮圖')
         help_msgs.append('```')
 
         await message.reply('\n'.join(help_msgs))
