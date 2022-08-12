@@ -20,15 +20,23 @@ async def reply_youtube_thumbnail(
     except KeyError:
         return
 
+    try:
+        await message.reply(
+            parse_and_generate_youtube_thumbnail_url(yt_url=yt_url)
+        )
+    except ValueError:
+        pass
+
+
+def parse_and_generate_youtube_thumbnail_url(yt_url: str) -> str:
     # pattern from:
     #   https://stackoverflow.com/questions/3452546/how-do-i-get-the-youtube-video-id-from-a-url#comment80849763_27728417
     if matched := re.fullmatch(
         r'^.*(?:(?:youtu\.be\/|v\/|vi\/|u\/\w\/|embed\/)|(?:(?:watch)?\?v(?:i)?=|\&v(?:i)?=))([^#\&\?]+).*',
         yt_url,
     ):
-        await message.reply(
-            _generate_youtube_thumbnail_url(youtube_video_id=matched.groups()[0])
-        )
+        return _generate_youtube_thumbnail_url(youtube_video_id=matched.groups()[0])
+    raise ValueError()
 
 
 def _generate_youtube_thumbnail_url(youtube_video_id: str) -> str:

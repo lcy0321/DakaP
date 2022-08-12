@@ -11,7 +11,7 @@ from .common import CommandFunc
 from .count_emojis import count_emojis
 from .get_time import get_time
 from .misc import random_choice, show_raw_message
-from .youtube_thumbnail import reply_youtube_thumbnail
+from .youtube_thumbnail import parse_and_generate_youtube_thumbnail_url, reply_youtube_thumbnail
 
 logger = logging.getLogger(__name__)    # pylint: disable=invalid-name
 logger.setLevel(logging.DEBUG)
@@ -32,6 +32,10 @@ class DakaP(discord.Client):
             guild_reactions=True,
             message_content=True,
         ))
+        self.tree = discord.app_commands.CommandTree(self)
+
+    async def setup_hook(self) -> None:
+        await self.tree.sync()
 
     async def on_ready(self) -> None:
         """Triggered when ready."""
@@ -130,13 +134,39 @@ class DakaP(discord.Client):
         return arguments
 
 
+client = DakaP()
+
+
+@discord.app_commands.guild_only()
+@discord.app_commands.default_permissions(
+    send_messages=True,
+    send_messages_in_threads=True,
+)
+@client.tree.context_menu(name='擷取 YT 預覽圖')
+async def _context_menu_reply_youtube_thumbnail(
+        interaction: discord.Interaction,
+        message: discord.Message,
+) -> None:
+    print('QQ')
+    for message_line in message.content.splitlines():
+        try:
+            thumbnail_url = parse_and_generate_youtube_thumbnail_url(yt_url=message_line)
+        except ValueError:
+            continue
+        else:
+            return await interaction.response.send_message(content=thumbnail_url)
+    return await interaction.response.send_message(
+        content='No YouTube URL found in the message.',
+        ephemeral=True,
+    )
+
+
 def main():
     """Run the bot with the token."""
 
     with open('bot-token', encoding='utf-8') as token_file:
         token = token_file.read().strip()
 
-    client = DakaP()
     asyncio.run(client.start(token))
 
 
