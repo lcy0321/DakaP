@@ -29,10 +29,10 @@ async def reply_youtube_thumbnail(
 
 
 def parse_and_generate_youtube_thumbnail_url(yt_url: str) -> str:
-    # pattern from:
+    # pattern modified from:
     #   https://stackoverflow.com/questions/3452546/how-do-i-get-the-youtube-video-id-from-a-url#comment80849763_27728417
     if matched := re.fullmatch(
-        r'^.*(?:(?:youtu\.be\/|v\/|vi\/|u\/\w\/|embed\/)|(?:(?:watch)?\?v(?:i)?=|\&v(?:i)?=))([^#\&\?]+).*',
+        r'^.*(?:(?:youtu\.be\/|v\/|vi\/|u\/\w\/|embed\/|live\/)|(?:(?:watch)?\?v(?:i)?=|\&v(?:i)?=))([^#\&\?]+).*',
         yt_url,
     ):
         return _generate_youtube_thumbnail_url(youtube_video_id=matched.groups()[0])
