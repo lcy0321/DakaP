@@ -17,7 +17,7 @@ async def reply_youtube_thumbnail(
     """Reply with the latest YouTube thumbnail"""
     try:
         yt_url = arguments[1]
-    except KeyError:
+    except IndexError:
         return
 
     try:

@@ -11,13 +11,20 @@ from .common import CommandFunc
 from .count_emojis import count_emojis
 from .get_time import get_time
 from .misc import random_choice, show_raw_message
-from .youtube_thumbnail import parse_and_generate_youtube_thumbnail_url, reply_youtube_thumbnail
+from .stock import get_stocks_prices
+from .youtube_thumbnail import (
+    parse_and_generate_youtube_thumbnail_url,
+    reply_youtube_thumbnail,
+)
 
-logger = logging.getLogger(__name__)    # pylint: disable=invalid-name
-logger.setLevel(logging.DEBUG)
-logging.basicConfig(format='%(asctime)s:%(levelname)-7s:%(message)s', datefmt='%Y-%m-%d %H:%M:%S')
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s:%(levelname)-7s:%(message)s',
+    datefmt='%Y-%m-%d %H:%M:%S',
+)
+logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
 
-T = TypeVar('T')    # pylint: disable=invalid-name
+T = TypeVar('T')  # pylint: disable=invalid-name
 
 
 class DakaP(discord.Client):
@@ -25,13 +32,15 @@ class DakaP(discord.Client):
 
     def __init__(self, prefix: str = '$'):
         self.prefix = prefix
-        super().__init__(intents=discord.Intents(
-            guilds=True,
-            emojis_and_stickers=True,
-            guild_messages=True,
-            guild_reactions=True,
-            message_content=True,
-        ))
+        super().__init__(
+            intents=discord.Intents(
+                guilds=True,
+                emojis_and_stickers=True,
+                guild_messages=True,
+                guild_reactions=True,
+                message_content=True,
+            )
+        )
         self.tree = discord.app_commands.CommandTree(self)
 
     async def setup_hook(self) -> None:
@@ -54,7 +63,6 @@ class DakaP(discord.Client):
             return
 
         for message_line in message.content.splitlines():
-
             arguments = self._parse_arguments(message_line)
 
             if arguments:
@@ -84,6 +92,9 @@ class DakaP(discord.Client):
                 elif command in ('yt', 'youtube'):
                     command_func = reply_youtube_thumbnail
 
+                elif command in ('stock', 'finance'):
+                    command_func = get_stocks_prices
+
                 # elif command == 'clean':
                 #     await self._clean_my_messages(message, arguments)
 
@@ -110,6 +121,8 @@ class DakaP(discord.Client):
         help_msgs.append('        顯示不同時區中的現在時間或特定時間')
         help_msgs.append('yt/youtube <YouTube URL>')
         help_msgs.append('        顯示該 YouTube 影片最新的縮圖')
+        help_msgs.append('stock/finance <stock symbol>')
+        help_msgs.append('        顯示該股票的最新價格（延遲）')
         help_msgs.append('```')
 
         await message.reply('\n'.join(help_msgs))
@@ -143,14 +156,15 @@ client = DakaP()
     send_messages_in_threads=True,
 )
 @client.tree.context_menu(name='擷取 YT 預覽圖')
-async def _context_menu_reply_youtube_thumbnail(
-        interaction: discord.Interaction,
-        message: discord.Message,
+async def context_menu_reply_youtube_thumbnail(
+    interaction: discord.Interaction,
+    message: discord.Message,
 ) -> None:
-    print('QQ')
     for message_line in message.content.splitlines():
         try:
-            thumbnail_url = parse_and_generate_youtube_thumbnail_url(yt_url=message_line)
+            thumbnail_url = parse_and_generate_youtube_thumbnail_url(
+                yt_url=message_line,
+            )
         except ValueError:
             continue
         else:

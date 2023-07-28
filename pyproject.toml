@@ -1,0 +1,10 @@
+[tool.isort]
+profile = "black"
+
+[tool.black]
+skip-string-normalization = "yes"
+
+[tool.pylint.'MESSAGES CONTROL']
+disable = """
+    logging-fstring-interpolation,
+"""
