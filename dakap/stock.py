@@ -42,10 +42,8 @@ def _get_discord_embed_for_stock_price(symbol: str) -> discord.Embed:
         actual_symbol = symbol
 
     ticker = yfinance.Ticker(ticker=actual_symbol)
-    info = ticker.info
-    # Work-around: https://github.com/ranaroussi/yfinance/issues/1636
-    # fast_info = ticker.fast_info
-    fast_info = ticker.get_fast_info
+    info = ticker.get_info()
+    fast_info = ticker.get_fast_info()
 
     name = info['longName']
     symbol = info['symbol']
